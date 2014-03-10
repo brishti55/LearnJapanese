@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <link href="css/jquery.mobile-1.0rc1.min.css" rel="stylesheet" type="text/css" />
+        <title>Learn Japanese</title>
+        <script type="text/javascript" src="phonegap.js"></script>
+   <!--     <script type="text/javascript" src="phonegap-1.1.0.js"></script> -->
+        <script type="text/javascript" src="js/jquery-1.6.4.js"></script>
+        <script type="text/javascript" src="js/jquery.mobile-1.0rc1.min.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/camera.js"></script>
+        <script type="text/javascript" src="js/media.js"></script>
+    </head>
+    <body>
+
+    <div id="indexPage" data-role="page">
+        <div id="wrap">
+         <canvas id="canvas"> </canvas>
+         <div class="app">
+
+          <div id = "demoButtonContainer">
+            <h1>日本語を学ぼう</h1>
+            <div data-role="fieldcontain">
+                <a id="studentDemo" data-role="button" data-inline="true" > <h2> がくせい デモ</h2></a> <br>
+            </div>
+            
+            <div data-role="fieldcontain">
+                <a id="teacherDemo" data-role="button" data-inline="true"> <h2> せんせい デモ </h2></a> <br>
+            </div>
+            
+            <div id="deviceready" class="blink">
+                <p class="event listening">Connecting to Device</p>
+                <p class="event received">ハッピー・クリスマス</p>
+            </div>
+        </div>
+       </div>
+ <!--
+            <button onclick="capturePhoto();">Capture Photo</button> <br>
+            <button onclick="capturePhotoEdit();">Capture Editable Photo</button> <br>
+            <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
+            <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
+            <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
+            <img style="display:none;" id="largeImage" src="" />
+            
+            <button onclick="playAudio('http://audio.ibeat.org/content/p1rj1s/p1rj1s_-_rockGuitar.mp3' );">Play Audio</button><br>
+            <button href="#" class="btn large" onclick="pauseAudio();">Pause Playing Audio</button><br>
+            <button href="#" class="btn large" onclick="stopAudio();">Stop Playing Audio</button><br>
+            <p id="audio_position"></p><br>
+            <button onclick="recordAudio()">Record Audio </button> <br>
+            <button onclick="stopRecord()"> Stop Record</button> <br>
+            <button onclick="playAudio()">Play</button>
+            <button onclick="resolveFile()">resolveFile</button> <br>
+-->
+            <script>
+                $(document).ready(function(){
+                    $("#studentDemo").click(function(){
+                        $.mobile.changePage("#studentLogin",{reverse:false,transition:"fade"})
+                    });
+                });
+                
+                $(document).ready(function(){
+                    $("#teacherDemo").click(function(){
+                        $.mobile.changePage("#teacherLogin",{reverse:false,transition:"fade"})
+                    });
+                });
+            </script>
+        </div>
+       </div>
+    
+    <!-- Lesson Page starts from here -->
+    <div id="lesson" data-role="page">
+        <div data-role="header">
+            <h1 id="lessonHeader"></h1>
+        </div>
+        
+        <div data-role="fieldcontain">
+            <div data-role="fieldcontain">
+                <button type="button" data-inline="true" onclick="location.href='index.html';" >ホーム</button>
+            </div>
+            <div data-role="fieldcontain" class="teacherOnly" >
+                <input type="button" data-inline="true" data-inline="true" id="senseiNoHeyaButton" name="senseiNoHeyaButton" value="先生の部屋へ" >
+            </div>
+            <div data-role="fieldcontain" class="studentOnly">
+                <input type="button" data-inline="true"  id="gakuseiNoHeyaButton" name="gakuseiNoHeyaButton" value="学生の部屋へ" >
+            </div>
+            <div data-role="fieldcontain" class="studentOnly">
+                <input type="button" data-inline="true"  id="toLesson" name="toLesson" value="レッスンページへもどる" >
+            </div>
+        
+            <div data-role="fieldcontain" class="teacherOnly">
+                <label class="lbl" for="newExerciseButton">新しい練習</label>
+                <a  id="newExerciseButton" href="#newExercise" data-role="button" data-inline="true" data-icon="plus">+</a>
+            </div>
+        
+            <div data-role="fieldcontain">
+                <label class="lbl" for="exerciseList">練習一覧</label> </br>
+                <div id="exerciseList">
+                
+                </div>
+            </div>
+            <script>
+                //handling new Exercise button click
+                $(document).ready(function(){
+                    $("#newExerciseButton").live('click',function(){
+                        $.mobile.changePage("#newExercise",{reverse:false,transition:"flip"});
+                    });
+                });
+            
+                //handling senseiNoHeya button click
+                $(document).ready(function(){
+                    $("#senseiNoHeyaButton").live('click',function(){
+                        lessonID = null;
+                        $.mobile.changePage("#teacher",{reverse:false,transition:"pop"});
+                    });
+                });
+            
+            
+                //still work needed
+                $(document).ready(function(){
+                    $("#gakuseiNoHeyaButton").live('click',function(){
+                        $.mobile.changePage("#student",{reverse:false,transition:"pop"});
+                    });
+                });
+            
+                $(document).ready(function(){
+                    $("#toLesson").live('click',function(){
+                        $.mobile.changePage("#teacher",{reverse:false,transition:"pop"});
+                    });
+                });
+            </script>
+        </div>
+    </div>
+      
+    <!-- Individual Exercise Page -->
+    <div id="exercise" data-role="page" >
+        <div data-role="header">
+            <h1> 練習 </h1>
+        </div>
+        
+        <div id="ex" data-role="fieldcontain">
+            <div data-role="fieldcontain">
+                <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+            </div>
+            <div data-role="fieldcontain">
+                <button id="backToLesson" type="button" data-inline="true">前にもどる</button>
+            </div>
+            
+            <div data-role="fieldcontain">
+				<label class="lbl" for="exImage"></label>
+                <img id="exImage" style="display:none;width:300px;height:300px;" src="" />
+            </div>
+            <div data-role="fieldcontain">
+				<label class="lbl" for="exTitle" style="font-size=0.8em;">れんしゅう名</label>
+				<h1 id="exTitle" name="exTitle" > <h1>
+			</div>
+            <div data-role="fieldcontain">
+                <label class="lbl" for="exRecord"></label>
+                <a id="exRecord" name="exRecord" onclick="" data-role="button" data-inline="true" style="background:red;">練習を聞く</a>
+			</div>
+            <div data-role="fieldcontain">
+                <label class="lbl" for="exDetail">れんしゅうについて</label>
+				<h3 id="exDetail" name="exDetail"> </h3>
+			</div>
+            
+        <form id="newResponseForm" method="post" class="studentOnly">
+            <div data-role="fieldcontain">
+                <label class="lbl" for="responseRecord"></label>
+                <a id="responseRecord" class="Record" name="Record" onclick="recordAudio();" style="background:green;font-size:20px;font-color:black;" data-role="button" data-inline="true" data-icon="plus">学生さん、答えを録音してください</a>
+                <p class="audioPositionForRecording"></p>
+            </div>
+            <div data-role="fieldcontain">
+                <label class="lbl" for="stopRecordBtn"></label>
+                <a class="stopRecordBtn" name="stopRecordBtn" onclick="stopRecord();" data-role="button" data-inline="true" style="background:red;font-size:15px;font-color:black;">録音終了</a>
+            </div>
+			<div data-role="fieldcontain">
+				<label class="lbl" for="exerciseVoice"></label>
+                <a onclick="playRecordedAudio();" data-role="button" data-inline="true" name="responseVoice" id="responseVoice" class="voice" style="background:blue;font-size:20px;font-color:black;">録音後聞いてください</a>
+                <p class="audioPositionForRecordPlay"></p>
+			</div>
+            <div data-role="fieldcontain">
+				<label class="lbl" for="saveRecord"></label>
+                <a onclick="" data-role="button" data-inline="true" data-icon="plus"　name="saveRecord" class="saveRecord" style="background:orange;font-size:18px;font-color:black;">録音を保存</a>
+			</div>
+
+			<div data-role="fieldcontain">
+				<input type="button" data-inline="true" data-theme="b" id="newResponseSubmitButton" value="OK">
+			</div>
+        </div>
+      </form>
+        
+        <div data-role="fieldcontain">
+            <label class="lbl" for="studentListForEx">練習をやった学生一覧</label> </br>
+            <div id="studentListForEx">
+                
+            </div>
+        </div>
+        
+        <script>
+                function clearDataHolders(){
+                    //clear
+                    $(".audioPositionForRecording").html("");
+                    //clear
+                    $(".audioPositionForRecordPlay").html("");
+                    //clear up data
+                    $("#exerciseImageHolder").css("display","none");
+                    $("#exerciseImageHolder").attr("src","");
+                    //Show save button
+                    $("#saveImage").html("");
+                    $("#saveImage").hide();
+                    
+                    //clearing the list
+                    $("#studentListForEx").html("");
+                        
+                }
+                $(document).ready(function(){
+                    $("#backToLesson").click(function(){
+                            stopAudio();
+                           // stopRecord();
+                            clearDataHolders();
+                            exerciseID = null;
+                            console.log("Back to lesson button pressed.");
+                            $.mobile.changePage("#lesson",{reverse:false,transition:"pop"});
+                    });
+                });
+
+                $(document).ready(function() {
+                    $("#newResponseSubmitButton").click(function(){
+                        stopAudio();
+                        stopRecord();
+                        clearDataHolders();
+                        mediaRec.stopRecord();
+                        //$.mobile.changePage("#response",{reverse:false,transition:"pop"});　// Will not go to the response page
+                       onclickFormSubmitNewResponse();
+                    });
+                });
+        </script>
+    </div>
+    
+    <!-- Response Page -->
+    <div id="response" data-role="page" >
+        <div data-role="header">
+            <h1>学生の答え</h1>
+        </div>
+        
+        <div data-role="content">
+            <div data-role="fieldcontain">
+                <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+            </div>
+            <div data-role="fieldcontain">
+                <input type="button" id="backToExercise" name="backToExercise" value="練習へもどる" data-inline="true">
+            </div>
+            
+            <div data-role="fieldcontain">
+                <img id="studentImageInResponse" style="display:none;width:200px;height:200px;" src="">
+            </div>
+            <div data-role="fieldcontain">
+                <h1 id="studentNameInResponse"> <h1>
+            </div>
+            <div data-role="fieldcontain">
+                <input type="button" id="responseVoiceButton" name="responseVoiceButton" value="学生の答え" data-inline="true">
+            </div>
+            <div data-role="fieldcontain">
+                <p class="audioPositionForPlaying"></p>
+            </div>
+             <div data-role="fieldcontain">
+                <h1 class="lbl" id="scoremarkHolder" name="scoremarkHolder"> </h1>
+            </div>
+            <div data-role="fieldcontain">
+                <h1 class="lbl" id="commentHolder" name="commentHolder"> </h1>
+            </div>
+            
+            <div id="teacherScoreComment" class="teacherOnly">
+             <form id="scoringForm" method="post">
+                <div data-role="fieldcontain">
+                    <label class="lbl" for="scoremark">スコアー</label>
+                    <input type="text" id="scoremark" name="scoremark">
+                </div>
+                <div data-role="fieldcontain">
+                    <label class="lbl" for="comment">コメント</label>
+                    <input type="text" id="comment" name="comment">
+                </div>
+                <div data-role="fieldcontain" class="teacherOnly">
+                    <input type="button" data-inline="true" data-theme="b" id="scoringFormSubmitButton" value="OK">
+                </div>
+             </form>
+            </div>
+            <script>
+                function clearDataForScore(){
+//                            $("#exerciseImageHolder").css("display","none");
+//                            $("#exerciseImageHolder").attr("src","");
+//                            //Show save button
+//                            $("#saveImage").html("");
+//                            $("#saveImage").hide();
+                    $(".audioPositionForPlaying").html("");
+                }
+
+                $(document).ready(function(){
+                    $("#responseVoiceButton").click(function(){
+                        console.log(audioURIForDBSave);
+                        playAudio(audioURIForDBSave);
+                    });
+                });
+                
+                $(document).ready(function(){
+                    $("#backToExercise").click(function(){
+                            console.log("Back to exercise button pressed.");
+                            $.mobile.changePage("#exercise",{reverse:false,transition:"pop"});
+                            stopAudio();
+                            clearDataForScore();
+                    });
+                });
+              
+              //insert the score and comment of sensei
+                $(document).ready(function() {
+                    $("#scoringFormSubmitButton").click(function(){
+                        onclickFormSubmitNewScoreComment();
+                        clearDataForScore();
+                    });
+                });
+            </script>
+        </div>
+    </div>
+    
+    <!--New Exercise Page-->
+    <div id="newExercise" data-role="page" >
+
+	  <div data-role="header">
+		<h1>新しいレッスン</h1>
+	  </div>
+
+	  <div data-role="content">
+       
+        <div data-role="fieldcontain">
+            <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+          </div>
+        <div data-role="fieldcontain">
+            <input id="backToTeacher" name="backToTeacher" type="button" value="先生の部屋へ" />
+        </div>
+
+		<form id="newExerciseForm" method="post">
+            
+            <input type="hidden" id="teacherID" name="teacherID" value="">
+            <input type="hidden" id="lessonID" name="lessonID" value="">
+			<input type="hidden" name="exerciseID" id="exerciseID" value="">
+			<div data-role="fieldcontain">
+				<label class="lbl" for="exerciseTitle">れんしゅう名</label>
+				<input type="text" name="exerciseTitle" id="exerciseTitle">
+			</div>
+            <div data-role="fieldcontain">
+				<label class="lbl" for="exerciseDetail">れんしゅうについて</label>
+				<input type="text" name="exerciseDetail" id="exerciseDetail">
+			</div>
+			<div data-role="fieldcontain">
+				<label class="lbl" for="exerciseImage"></label>
+                <a onclick="getPhoto(pictureSource.PHOTOLIBRARY,'lesson');" data-role="button" data-inline="true" data-icon="plus"　name="exerciseImage" id="exerciseImage">画像をとってください</a>
+			</div>
+
+            <div data-role="fieldcontain">
+				<label class="lbl" for="exerciseImageHolder"></label>
+                <img id="exerciseImageHolder" style="display:none;width:200px;height:200px;" src="">
+			</div>
+            <div data-role="fieldcontain">
+				<label class="lbl" for="saveImage"></label>
+                <a id="saveImage" name="saveImage" onclick="moveAndsaveImageToDB();" data-role="button" data-inline="true" style="display:none;"></a>
+            </div>
+            <div data-role="fieldcontain">
+                <label class="lbl" for="exerciseRecord"></label>
+                <a id="exerciseRecord" class="Record" onclick="recordAudio();" data-role="button" data-inline="true" data-icon="plus">録音してください</a>
+                <p class="audioPositionForRecording"></p>
+            </div>
+            <div data-role="fieldcontain">
+                <label class="lbl" for="stopRecordBtn"></label>
+                <a class="stopRecordBtn" name="stopRecordBtn" onclick="stopRecord();" data-role="button" data-inline="true" data-icon="plus">録音終了</a>
+            </div>
+			<div data-role="fieldcontain">
+				<label class="lbl" for="exerciseVoice"></label>
+                <a id="exerciseVoice" class="voice" onclick="playRecordedAudio();" data-role="button" data-inline="true" data-icon="plus"　name="exerciseVoice">録音後聞いてください</a>
+                <p class="audioPositionForRecordPlay"></p>
+			</div>
+            <div data-role="fieldcontain">
+				<label class="lbl" for="saveRecord"></label>
+                <a name="saveRecord" class="saveRecord" onclick="" data-role="button" data-inline="true" data-icon="plus"　>録音を保存</a>
+			</div>
+
+			<div data-role="fieldcontain">
+				<input type="button" data-inline="true" data-theme="b" id="newExerciseFormSubmitButton" value="OK">
+			</div>
+		</form>
+        
+        <script>
+                $(document).ready(function(){
+                    $("#backToTeacher").click(function(){
+                            //set lesson id and exercise id null
+                            lessonID = null;
+                            exerciseID = null;
+                            console.log("Back to teacher button pressed.");
+                            $.mobile.changePage("#teacher",{reverse:false,transition:"pop"});
+                    });
+                });
+            
+                $(document).ready(function() {
+                    $("#newExerciseFormSubmitButton").click(function(){
+                        //clear audio value
+                        $(".audioPositionForRecording").html("");
+                         //clear
+                        $(".audioPositionForRecordPlay").html("");                        
+                        //clear up
+                        $("#exerciseImageHolder").css("display","none");
+                        $("#exerciseImageHolder").attr("src","");
+                        //Show save button
+                        $("#saveImage").html("");
+                        $("#saveImage").hide();
+                        $.mobile.changePage("#lesson",{reverse:false,transition:"pop"});
+                        onclickFormSubmitNewExercise();
+
+                    });
+                });
+        </script>
+	</div>
+  </div>
+    
+    <!-- New Lesson Page -->
+    <div id="newLesson" data-role="page">
+        
+        <script>
+            
+        </script>
+    </div>
+    
+    <!--Teacher Page -->
+    <div id="teacher" data-role="page" >
+        <div data-role="header">
+            <h1>ようこそ</h1>
+        </div>
+        <div data-role="fieldcontain">
+            <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+        </div>
+        <div class="teacherOnly" data-role="fieldcontain">
+            <input type="button" data-inline="true" id="backToTeacherFirst" name="backToTeacherFirst" value="ログインページ">
+        </div>
+
+        <div class="teacherOnly" data-role="fieldcontain">
+            <label class="lbl" for="newLessonFormButton">新しいレッスン</label>
+            <input type="button" data-inline="true" id="newLessonFormButton" name="newLessonFormButton" value="+">
+        </div>
+
+
+        
+        <div data-role="fieldcontain">
+            <label class="lbl" for="lessonsList">レッスン一覧</label> </br>
+            <div id="lessonsList">
+                
+            </div>
+        </div>
+        <script>
+                $(document).ready(function(){
+                    $("#backToTeacherFirst").click(function(){
+                            //set teacher ID null
+                            teacherID = null;
+                            console.log("Back to teacher button pressed.");
+                            $.mobile.changePage("#teacherLogin",{reverse:false,transition:"pop"});
+                    });
+                });
+            
+                $(document).ready(function(){
+                    $("#newLessonFormButton").click(function(){
+                        console.log("New Lesson Form Button Clicked");
+                        $.mobile.changePage("#newExercise",{reverse:false,transition:"flip"});
+                    });
+                });
+        </script>
+      
+      </div>
+
+    <!-- Teacher Login Page -->
+    <div id="teacherLogin" data-role="page" >
+        <div data-role="header">
+            <h1>先生のログインページ</h1>
+        </div>
+        <div data-role="fieldcontain">
+            <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+        </div><br>
+        <div data-role="fieldcontain">
+            <label class="lbl" for="teacherPassword"><p>パスワード</p></label>
+            <input id="teacherPassword" type="text">
+        </div>
+        <div data-role="fieldcontain">
+            <a id="teacherClick" href="javascript:void(0);id?1" data-role="button" data-inline="true" onclick="jumpToTeacherRoom();"> 先生の部屋へ </a>
+        </div>
+
+        
+        <script>
+            function jumpToTeacherRoom(){
+                if($("#teacherPassword").val() == "131719" ){
+                    $("#teacherPassword").val("");
+                    console.log("href attribute:" + $("#teacherClick").attr("href"));
+                    $.mobile.changePage("#teacher",{reverse:false,transition:"pop"});
+                }else{
+                    $("#teacherPassword").val("");
+                    alert("パスワードを入力されていないまたはパスワードが間違っています。\n正しく入力してください。")
+                }
+            }
+        </script>
+    </div>
+    
+    <!--Student Page -->
+    <div id="student" data-role="page">
+     <div data-role="header">
+            <h1>ようこそ</h1>
+     </div>
+     <div data-role="content">
+         <div data-role="fieldcontain">
+            <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+         </div>
+        <div data-role="fieldcontain">
+            <a id="toLessonPageBtn" data-role="button" data-inline="true" onclick="jumpToLessonPage();">今日のレッスン</a>
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+                isStudent = true;
+                isTeacher = false;
+                $("#toLessonPageBtn").click(function(){
+                    $.mobile.changePage("#teacher?studentID="+studentID,{reverse:false,transition:"pop"});
+                });
+            });
+        </script>
+      </div>
+     </div>
+    
+    <!-- Student Login Page -->
+    <div id="studentLogin" data-role="page">
+
+        <div data-role="header">
+            <h1>学生のログインページ</h1>
+        </div>
+        
+        <div id="studentRegistration">
+           <div data-role="fieldcontain">
+               <button type="button" data-inline="true" onclick="location.href='index.html';">ホーム</button>
+           </div>
+            
+            <form id="studentRegistrationForm" action="student" method="post">
+                <!--Student ID-->
+                <input type="hidden" name="studentId" id="studentId" value="">
+                <!--Student Image -->
+                <div data-role="fieldcontain">
+                    <a onclick="getPhoto(pictureSource.PHOTOLIBRARY,'student');" data-role="button" data-inline="true" data-icon="plus"　name="studentImage" id="studentImage">学生の画像</a>
+                </div>
+                <div data-role="fieldcontain">
+                    <label class="lbl" for="studentImageHolder"></label>
+                    <img id="studentImageHolder" style="display:none;width:200px;height:200px;" src="">
+                </div>
+                <div data-role="fieldcontain">
+                    <label class="lbl" for="saveStudentImage"></label>
+                    <a id="saveStudentImage" name="saveStudentImage" onclick="moveAndsaveStudentImageToDB();" data-role="button" data-inline="true" style="display:none;"></a>
+                </div>
+                <!--Student Name -->
+                <div data-role="fieldcontain">
+                    <label class="lbl" for="studentName">名前</label>
+                    <input type="text" name="studentName" id="studentName"><br>
+                </div>
+                <!--Submit Button -->
+                <div data-role="fieldcontain">
+                    <input type="button" data-inline="true" id="studentFormSubmitButton" value="GO!">
+                </div>
+            </form>
+            <div data-role="fieldcontain">
+                <div id="studentList">
+                </div>
+            </div>
+            
+            <script>
+                function clearStudentDataHolder(){
+                            $("#studentImageHolder").css("display","none");
+
+                            $("#studentImageHolder").attr("src","");
+                            //Show save button
+                            $("#saveStudentImage").html("");
+                            $("#saveStudentImage").hide();                    
+                }
+            
+                $(document).ready(function(){
+                    $("#studentFormSubmitButton").click(function(){
+                        clearStudentDataHolder();
+                        onFormSubmitStudentRegistration();
+                    });
+                });
+            </script>
+            
+        </div>
+      </div>
+
+    
+  </body>
+</html>
